@@ -1,0 +1,23 @@
+{
+  "name": "slarchive-archiver",
+  "version": "1.0.0",
+  "description": "Archiver that listens to messages on slack channels and stores them in elasticsearch",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BenoitAverty/slarchive.git"
+  },
+  "author": "Benoit Averty",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/BenoitAverty/slarchive/issues"
+  },
+  "homepage": "https://github.com/BenoitAverty/slarchive#readme",
+  "dependencies": {
+    "node-fetch": "^1.6.3",
+    "rxjs": "^5.0.0-rc.1"
+  }
+}
