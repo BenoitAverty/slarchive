@@ -1,4 +1,4 @@
-import Rx from 'rxjs/Rx'
+import {Observable} from 'rxjs/Rx'
 import fetch from 'node-fetch'
 import {__, pipe, contains, map, filter} from 'ramda'
 
@@ -6,10 +6,8 @@ import {channelsList, channelsHistory} from './api-calls'
 
 import config from 'config'
 
-const Observable = Rx.Observable
-
 /**
- * Return an observable of channel IDs corresponding to the channels to monitor for messages
+ * Return an observable of channel objects (name + ID) corresponding to the channels to monitor for messages
  */
 function channelsToMonitor() {
   // Predicate that tells if a channel is wanted in the config
@@ -18,18 +16,19 @@ function channelsToMonitor() {
     contains(__, config.slack.channels)
   )
 
-  return Observable.from(channelsList())
+  return channelsList()
     .mergeMap(::Observable.from)
     .filter(channelIsWanted)
-    .map(c => c.id)
+    .map(c => ({ name: c.name, id: c.id }))
 }
 
 /**
- * return an obervable of messages from the given channel ID
+ * return an obervable of messages from the given channel
  */
-function channelMessages(channelId) {
-  return Observable.from(channelsHistory(channelId))
+function channelMessages(channel) {
+  return channelsHistory(channel.id)
     .mergeMap(::Observable.from)
+    .map(message => ({ ...message, channel}))
 }
 
 /**
