@@ -1,0 +1,35 @@
+{
+  "template": "slack*",
+
+  "mappings": {
+    "messages": {
+      "properties": {
+        "user": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "subtype": {
+          "type": "string"
+        },
+        "ts": {
+          "type": "date"
+        },
+        "channel": {
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}
