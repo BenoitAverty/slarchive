@@ -1,15 +1,35 @@
-import {sources as slackSources} from './slack'
-import {sinks as elasticSinks} from './elasticsearch'
+import {Observable} from 'rxjs'
+import Cycle from '@cycle/rxjs-run'
+import {pipe, propEq, prop, pick} from 'ramda'
 
-/**
- * Main file of the archiver.
- * Connect sources to appropriate sinks.
- */
+import {slack as slackConfig, elasticsearch as elasticConfig} from 'config'
 
-// Sources : use sources to retrieve observables of data
-const message$ = slackSources.messagesInMonitoredChannels();
+import {debugEvent} from '~/logger'
 
-// Sinks : pass observables to sinks, they will subscribe and make appropriate write effects
-// Disable unused expressions warning when using a sink
-// eslint-disable-next-line fp/no-unused-expression
-elasticSinks.insertMessages(message$)
+import makeSlackDriver from './slack/driver'
+import {channelIsWanted} from './slack'
+// import makeElasticDriver from './elasticsearch/driver'
+
+function main({ slack }) {
+
+  // Query slack driver to send the channels
+  const channelsQuery = Observable.of({
+    type: 'channels'
+  })
+
+  const channels = slack
+    .filter(propEq('type', 'channels'))
+    .map(prop('payload'))
+    .filter(channelIsWanted)
+    .map(pick(['name', 'id']))
+    .subscribe(debugEvent("Channel  : %s")) // TODO : do something with this and don't subscribe inside main.
+
+  return {
+    slack: channelsQuery
+  }
+}
+
+Cycle.run(main, {
+  slack: makeSlackDriver(slackConfig),
+  // elasticsearch: makeElasticDriver(elasticConfig)
+})

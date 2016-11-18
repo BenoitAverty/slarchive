@@ -17,25 +17,26 @@ function channelMessages(channel) {
     .map(message => ({ ...message, channel}))
 }
 
-// Returns an observable of all messages in monitored channels
-function messagesInMonitoredChannels() {
-  // Predicate that tells if a channel is wanted in the config
-  const channelIsWanted = pipe(
-    prop('name'),
-    contains(__, slack.channels)
-  )
+/**
+ * Predicate that tells if a channel is wanted in the config
+ */
+export const channelIsWanted = pipe(
+ prop('name'),
+ contains(__, slack.channels)
+)
 
-  const monitoredChannel$ = channelsList()
-    .mergeMap(::Observable.from)
-    .do(traceEvent('Found channel : %s'))
-    .filter(channelIsWanted)
-    .map(pick(['name', 'id']))
-    .do(debugEvent('Found monitored channel : %s'))
-
-  return monitoredChannel$
-    .mergeMap(channelMessages)
-}
-
-export const sources = {
-  messagesInMonitoredChannels
-}
+// const monitoredChannels = channelsList()
+//   .mergeMap(::Observable.from)
+//   .do(traceEvent('Found channel : %s'))
+//   .filter(channelIsWanted)
+//   .map(pick(['name', 'id']))
+//   .do(debugEvent('Found monitored channel : %s'))
+//
+// const messagesInMonitoredChannels =
+//   return monitoredChannels
+//     .mergeMap(channelMessages)
+// }
+//
+// export const sources = {
+//   messagesInMonitoredChannels
+// }

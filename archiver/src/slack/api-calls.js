@@ -3,6 +3,7 @@ import fetch from 'node-fetch'
 import {__, map, prop, mapObjIndexed, pipe, contains, filter, tap, values, join} from 'ramda'
 
 import config from 'config'
+import logger from '~/logger'
 
 /**
  * Calls the method provided in the slack API, with the given params, and returns the response as json.
@@ -23,6 +24,7 @@ function slackApiCall(method, params) {
  * Fetches the list of channels from the slack API
  */
 export function channelsList() {
+  logger.debug(`Making request to channels endpoint.`)
   return Observable.from(slackApiCall('channels.list', { exclude_archived: '1' }))
     .map(prop('channels'))
 }
