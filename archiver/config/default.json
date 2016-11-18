@@ -1,0 +1,15 @@
+{
+  "log": {
+    "level": "debug"
+  },
+  "slack": {
+    "token": "<redacted>",
+    "endpoint": "https://slack.com/api",
+    "channels": ["hyper", "random", "announcements"]
+  },
+  "elasticsearch": {
+    "endpoint": "http://localhost:9200",
+    "msgIndex": "slack",
+    "msgType": "messages"
+  }
+}

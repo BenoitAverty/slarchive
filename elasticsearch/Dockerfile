@@ -1,1 +1,1 @@
-from elasticsearch:2.4
+from elasticsearch:5

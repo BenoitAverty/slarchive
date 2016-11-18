@@ -1,7 +1,15 @@
-import {messagesInMonitoredChannels} from './slack/slack-messages'
-import {messagesInIndex} from './elasticsearch/api-calls'
+import {sources as slackSources} from './slack'
+import {sinks as elasticSinks} from './elasticsearch'
 
-/* Subscriptions are in this file, so we disable the unused expressions. */
-/* eslint-disable fp/no-unused-expression */
+/**
+ * Main file of the archiver.
+ * Connect sources to appropriate sinks.
+ */
 
-messagesInMonitoredChannels().subscribe(console.log)
+// Sources : use sources to retrieve observables of data
+const message$ = slackSources.messagesInMonitoredChannels();
+
+// Sinks : pass observables to sinks, they will subscribe and make appropriate write effects
+// Disable unused expressions warning when using a sink
+// eslint-disable-next-line fp/no-unused-expression
+elasticSinks.insertMessages(message$)

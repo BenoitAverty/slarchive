@@ -1,6 +1,6 @@
 import {Observable} from 'rxjs/Rx'
 import fetch from 'node-fetch'
-import {__, map, mapObjIndexed, pipe, contains, filter, tap, values, join} from 'ramda'
+import {__, map, prop, mapObjIndexed, pipe, contains, filter, tap, values, join} from 'ramda'
 
 import config from 'config'
 
@@ -24,13 +24,13 @@ function slackApiCall(method, params) {
  */
 export function channelsList() {
   return Observable.from(slackApiCall('channels.list', { exclude_archived: '1' }))
-    .map(body => body.channels)
+    .map(prop('channels'))
 }
 
 /**
  * Fetches the history of the given channel
  */
-export function channelsHistory(channelId) {
-  return Observable.from(slackApiCall('channels.history', { channel: channelId, count: '10000' }))
-    .map(body => body.messages)
+export function channelsHistory(channelId, historySize = 10000) {
+  return Observable.from(slackApiCall('channels.history', { channel: channelId, count: historySize }))
+    .map(prop('messages'))
 }
