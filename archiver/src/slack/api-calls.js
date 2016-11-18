@@ -1,9 +1,9 @@
-import {Observable} from 'rxjs/Rx'
+import {Observable} from 'rxjs'
 import fetch from 'node-fetch'
 import {__, map, prop, mapObjIndexed, pipe, contains, filter, tap, values, join} from 'ramda'
 
 import config from 'config'
-import logger from '~/logger'
+import logger, {debugEvent} from '~/logger'
 
 /**
  * Calls the method provided in the slack API, with the given params, and returns the response as json.
@@ -24,7 +24,8 @@ function slackApiCall(method, params) {
  * Fetches the list of channels from the slack API
  */
 export function channelsList() {
-  logger.debug(`Making request to channels endpoint.`)
+  logger.trace(`Making request to channels endpoint.`)
+  
   return Observable.from(slackApiCall('channels.list', { exclude_archived: '1' }))
     .map(prop('channels'))
 }
@@ -32,7 +33,9 @@ export function channelsList() {
 /**
  * Fetches the history of the given channel
  */
-export function channelsHistory(channelId, historySize = 10000) {
+export function channelHistory(channelId, historySize = 10000) {
+  logger.trace(`Making request to history endpoint (${channelId}, ${historySize})`)
+
   return Observable.from(slackApiCall('channels.history', { channel: channelId, count: historySize }))
     .map(prop('messages'))
 }

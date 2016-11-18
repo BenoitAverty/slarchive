@@ -6,30 +6,33 @@ import {slack as slackConfig, elasticsearch as elasticConfig} from 'config'
 
 import {debugEvent} from '~/logger'
 
-import makeSlackDriver from './slack/driver'
-import {channelIsWanted} from './slack'
-// import makeElasticDriver from './elasticsearch/driver'
+import makeSlackDriver, {historyQuery, channelsQuery} from './slack/driver'
+import {channelIsWanted} from './slack/utils'
+import makeElasticDriver, {insertQuery} from './elasticsearch/driver'
 
-function main({ slack }) {
+function main(sources) {
 
-  // Query slack driver to send the channels
-  const channelsQuery = Observable.of({
-    type: 'channels'
-  })
+  // Query slack driver to send the channels at startup
+  const channelsQueries = Observable.of(channelsQuery())
 
-  const channels = slack
-    .filter(propEq('type', 'channels'))
-    .map(prop('payload'))
+  const historyQueries = sources.slack
+    .select('channels')
     .filter(channelIsWanted)
     .map(pick(['name', 'id']))
-    .subscribe(debugEvent("Channel  : %s")) // TODO : do something with this and don't subscribe inside main.
+    .map(historyQuery)
+
+  const elasticsearchInsertQueries = sources.slack
+    .select('history')
+    .map(insertQuery)
 
   return {
-    slack: channelsQuery
+    slack: Observable.merge(channelsQueries, historyQueries),
+    elasticsearch: elasticsearchInsertQueries
   }
 }
 
+// eslint-disable-next-line fp/no-unused-expression
 Cycle.run(main, {
   slack: makeSlackDriver(slackConfig),
-  // elasticsearch: makeElasticDriver(elasticConfig)
+  elasticsearch: makeElasticDriver(elasticConfig)
 })

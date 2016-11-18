@@ -1,5 +1,5 @@
 import fetch from 'node-fetch'
-import {toString} from 'ramda'
+import {toString, curry} from 'ramda'
 
 import logger, {traceEvent} from '~/logger'
 import {elasticsearch} from 'config'
@@ -14,12 +14,13 @@ function lastMessageOfChannel(channelName) {
 /**
  * Insert a document into elasticsearch, in given index and type.
  */
-export function insertDocument(index, type, document) {
+function insertDocument_(endpoint, index, type, document) {
   logger.trace(`Adding a document into elasticsearch : ${toString(document)} (${elasticsearch.msgIndex}/${elasticsearch.msgType})`)
-  return fetch(`${elasticsearch.endpoint}/${index}/${type}`, {
+  return fetch(`${endpoint}/${index}/${type}`, {
     method: 'POST',
     body: toString(document)
   })
   .then(resp => resp.json())
   .then(traceEvent('Response from elasticsearch : %s'))
 }
+export const insertDocument = curry(insertDocument_)
