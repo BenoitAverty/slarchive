@@ -15,14 +15,21 @@ function main(sources) {
   // Query slack driver to send the channels at startup
   const channelsQueries = Observable.of(channelsQuery())
 
+  // Query for channels history when receiving channels
   const historyQueries = sources.slack
     .select('channels')
+    .map(prop('channels'))
+    .mergeMap(::Observable.from)
     .filter(channelIsWanted)
     .map(pick(['name', 'id']))
     .map(historyQuery)
 
+  // Insert the messages we receive
   const elasticsearchInsertQueries = sources.slack
     .select('history')
+    .map(prop('messages'))
+    .mergeMap(::Observable.from)
+    .do(debugEvent("Received history : "))
     .map(insertQuery)
 
   return {

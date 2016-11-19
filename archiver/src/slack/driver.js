@@ -45,23 +45,25 @@ export default function makeSlackDriver(config) {
     const channelsQueries = sinks
       .filter(isChannelQuery)
       .do(debugEvent('Slack driver received a channels query'))
+      .share()
     const historyQueries = sinks
       .filter(isHistoryQuery)
       .map(prop('payload'))
       .do(debugEvent('Slack driver received an history query : %s'))
+      .share()
 
     channelsQueries
       .mergeMap(channelsList)
-      .mergeMap(::Observable.from)
       .map(channelResult)
       .subscribe(::source.next)
 
     historyQueries
-      .mergeMap(channel =>
-        channelHistory(channel.id)
-          .mergeMap(::Observable.from)
-          .map(assoc('channel', channel))
-      )
+      .map(prop('id'))
+      .mergeMap(channelHistory)
+      .zip(historyQueries, ({ ...result, messages }, channel) => ({
+        ...result,
+        messages: messages.map(assoc('channel', channel))
+      }))
       .map(historyResult)
       .subscribe(::source.next)
 

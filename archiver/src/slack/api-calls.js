@@ -25,17 +25,19 @@ function slackApiCall(method, params) {
  */
 export function channelsList() {
   logger.trace(`Making request to channels endpoint.`)
-  
-  return Observable.from(slackApiCall('channels.list', { exclude_archived: '1' }))
-    .map(prop('channels'))
+
+  return Observable.from(
+    slackApiCall('channels.list', { exclude_archived: '1' })
+  )
 }
 
 /**
  * Fetches the history of the given channel
  */
-export function channelHistory(channelId, historySize = 10000) {
-  logger.trace(`Making request to history endpoint (${channelId}, ${historySize})`)
+export function channelHistory(channelId) {
+  logger.trace(`Making request to history endpoint (${channelId})`)
 
-  return Observable.from(slackApiCall('channels.history', { channel: channelId, count: historySize }))
-    .map(prop('messages'))
+  return Observable.from(
+    slackApiCall('channels.history', { channel: channelId, count: 100 })
+  )
 }
